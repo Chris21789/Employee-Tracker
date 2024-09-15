@@ -4,7 +4,7 @@ const { Pool } = require("pg");
 const pool = new Pool(
   {
     user: "postgres",
-    password: "",
+    password: "Asdf0987!",
     host: "localhost",
     database: "employees_db",
   },
@@ -121,12 +121,18 @@ function getRoleChoices() {
 function getMngrChoices() {
   return pool
     .query("SELECT id, first_name, last_name FROM employee")
-    .then((res) =>
-      res.rows.map((row) => ({
+    .then((res) => {
+      const managers = res.rows.map((row) => ({
         name: `${row.first_name} ${row.last_name}`,
         value: row.id,
-      }))
-    )
+      }));
+
+      managers.unshift({
+        name: "None",
+        value: null,
+      });
+      return managers;
+    })
     .catch((err) => {
       console.error("Error querying managers:", err);
       return [];
