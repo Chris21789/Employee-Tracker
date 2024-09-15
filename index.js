@@ -4,11 +4,11 @@ const { Pool } = require("pg");
 const pool = new Pool(
   {
     user: "postgres",
-    password: "Asdf0987!",
+    password: "",
     host: "localhost",
     database: "employees_db",
   },
-  console.log(`Successfully connected to employees_db!`)
+//   console.log(`Successfully connected to employees_db!`)
 );
 
 pool.connect();
@@ -139,7 +139,7 @@ function getMngrChoices() {
     });
 }
 
-function getEmpChoices() {
+function updateEmpChoices() {
   return pool
     .query("SELECT id, first_name, last_name FROM employee")
     .then((res) =>
@@ -209,7 +209,7 @@ const empQuery = `
         e.first_name,
         e.last_name,
         r.title,
-        d.department,
+        d.name AS department,
         r.salary,
         m.first_name || ' ' || m.last_name AS "manager"
     FROM employee e
@@ -309,7 +309,29 @@ function addEmp() {
 }
 
 function updEmpRole() {
-  empTracker();
+  updateEmpChoices().then((employees) => {
+    updEmpRoleQst[0].choices = employees;
+
+    getRoleChoices().then((roles) => {
+      updEmpRoleQst[1].choices = roles;
+
+      inquirer.prompt(updEmpRoleQst).then((res) => {
+        pool
+          .query("UPDATE employee SET role_id = $1 WHERE id =$2", [
+            res.updEmpRoleRole,
+            res.updEmpRoleName,
+          ])
+          .then(() => {
+            console.log(`Updated employee's role`);
+            empTracker();
+          })
+          .catch((err) => {
+            console.error(`Error updating employee's role:`, err);
+            empTracker();
+          });
+      });
+    });
+  });
 }
 
 empTracker();
