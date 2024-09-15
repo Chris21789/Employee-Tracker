@@ -161,18 +161,48 @@ function empTracker() {
     });
 }
 
-async function viewDpts() { }
+function viewDpts() {
+    pool.query("SELECT * FROM department")
+    .then(result => {
+        console.table(result.rows);
+        empTracker();
+    })
+    .catch(err => {
+        console.error("Error querying departments:", err);
+        empTracker();
+    });
+}
 
-async function viewRoles() { }
+function viewRoles() {
+    pool.query("SELECT * FROM role")
+    .then(result => {
+        console.table(result.rows);
+        empTracker();
+    })
+    .catch(err => {
+        console.error("Error querying roles:", err);
+        empTracker();
+    });
+}
 
-async function viewEmps() { }
+function viewEmps() {
+    pool.query("SELECT * FROM employee")
+    .then(result => {
+        console.table(result.rows);
+        empTracker();
+    })
+    .catch(err => {
+        console.error("Error querying employees:", err);
+        empTracker();
+    });
+}
 
-async function addDpt() { }
+function addDpt() { }
 
-async function addRole() { }
+function addRole() { }
 
-async function addEmp() { }
+function addEmp() { }
 
-async function updEmpRole() { }
+function updEmpRole() { }
 
 empTracker();
