@@ -185,8 +185,23 @@ function viewRoles() {
     });
 }
 
+const empQuery = `
+    SELECT
+        e.id,
+        e.first_name,
+        e.last_name,
+        r.title,
+        d.department,
+        r.salary,
+        m.first_name || ' ' || m.last_name AS "manager"
+    FROM employee e
+    JOIN role r ON e.role_id = r.id
+    JOIN department d on r.department = d.id
+    LEFT JOIN employee m ON e.manager_id = m.id
+`;
+
 function viewEmps() {
-    pool.query("SELECT * FROM employee")
+    pool.query(empQuery)
     .then(result => {
         console.table(result.rows);
         empTracker();
