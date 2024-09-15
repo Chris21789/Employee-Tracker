@@ -243,15 +243,16 @@ function addDpt() {
 function addRole() {
   getDptChoices().then((departments) => {
     addRoleQst[2].choices = departments;
-    console.log(departments);
-    
+    // console.log(departments);
+
     inquirer.prompt(addRoleQst).then((res) => {
-        console.log(res);
-        
+      //   console.log(res);
+
       pool
         .query(
           "INSERT INTO role (title, salary, department) VALUES ($1, $2, $3)",
-          [res.newRoleName, res.newRoleSalary, res.newRoleDpt])
+          [res.newRoleName, res.newRoleSalary, res.newRoleDpt]
+        )
         .then(() => {
           console.log(`Added ${res.newRoleName} to the database.`);
           empTracker();
@@ -265,7 +266,40 @@ function addRole() {
 }
 
 function addEmp() {
-  empTracker();
+  getRoleChoices().then((roles) => {
+    addEmpQst[2].choices = roles;
+    // console.log(roles);
+
+    getMngrChoices().then((managers) => {
+      addEmpQst[3].choices = managers;
+      //   console.log(managers);
+
+      inquirer.prompt(addEmpQst).then((res) => {
+        // console.log(res);
+
+        pool
+          .query(
+            "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)",
+            [
+              res.newEmpFstName,
+              res.newEmpLstName,
+              res.newEmpRole,
+              res.newEmpMngr,
+            ]
+          )
+          .then(() => {
+            console.log(
+              `Added ${res.newEmpFstName} ${res.newEmpLstName} to the database.`
+            );
+            empTracker();
+          })
+          .catch((err) => {
+            console.error("Error adding to the database:", err);
+            empTracker();
+          });
+      });
+    });
+  });
 }
 
 function updEmpRole() {
