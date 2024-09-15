@@ -5,7 +5,7 @@ VALUES  ('Human Resources'),
         ('Tech Support'),
         ('Building Services');
         
-INSERT INTO role (title, salary, department_id)
+INSERT INTO role (title, salary, department)
 VALUES  ('Training and development', 60000, 1),
         ('Employee Relations', 65000, 1),
         ('Compensation and benefits', 70000, 1),
