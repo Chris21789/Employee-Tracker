@@ -9,7 +9,9 @@ const pool = new Pool(
         database: 'employees_db',
     },
     console.log(`Successfully connected to employees_db!`)    
-)
+);
+
+pool.connect();
 
 const mainQst = [
     {
@@ -51,7 +53,7 @@ const addRoleQst = [
         type: 'list',
         message: 'Which department does the role belong to?',
         name: 'newRoleDpt',
-        choices: [],
+        choices: dptChoices,
     },
 ];
 
@@ -70,13 +72,13 @@ const addEmpQst = [
         type: 'list',
         message: `What is the employee's role?`,
         name: 'newEmpRole',
-        choice: [],
+        choices: roleChoices,
     },
     {
         type: 'list',
         message: `Who is the employee's manager?`,
         name: 'newEmpMngr',
-        choice: [],
+        choices: mngrChoices,
     },
 ];
 
@@ -85,44 +87,84 @@ const updEmpRoleQst = [
         type: 'list',
         message: `Which employee's role do you want to update?`,
         name: 'updEmpRoleName',
-        choice: [],
+        choices: empChoices,
     },
     {
         type: 'list',
         message: `Which role do you want to assign the selected employee?`,
         name: 'updEmpRoleRole',
-        choice: [],
+        choices: roleChoices,
     },
 ];
 
-function empTracker () {
+async function getDptChoices () {
+    try {
+        const dptChoices = await pool.query('SELECT name FROM department');
+        return dptChoices.rows.map(row =>  row.name);
+    } catch (err) {
+        console.error('Error querying department:', err);
+        return [];
+    }
+};
+
+async function getRoleChoices () {
+    try {
+        const roleChoices = await pool.query('SELECT id, title FROM role');
+        return roleChoices.rows.map(row =>  ({ name: row.title, value: row.id }));
+    } catch (err) {
+        console.error('Error querying role:', err);
+        return [];
+    }
+};
+
+async function getMngrChoices () {
+    try {
+        const mngrChoices = await pool.query('SELECT id, first_name, last_name FROM employee');
+        return mngrChoices.rows.map(row =>  ({ name: `${row.first_name} ${row.last_name}`, value: row.id }));
+    } catch (err) {
+        console.error('Error querying department:', err);
+        return [];
+    }
+};
+
+async function getEmpChoices () {
+    try {
+        const empChoices = await pool.query('SELECT id, first_name, last_name FROM employee');
+        return empChoices.rows.map(row =>  ({ name: `${row.first_name} ${row.last_name}`, value: row.id }));
+    } catch (err) {
+        console.error('Error querying department:', err);
+        return [];
+    }
+};
+
+async function empTracker () {
 
 };
 
-function viewDpt () {
+async function viewDpt () {
 
 };
 
-function viewRole () {
+async function viewRole () {
 
 };
 
-function viewEmp () {
+async function viewEmp () {
 
 };
 
-function addDpt () {
+async function addDpt () {
 
 };
 
-function addRole () {
+async function addRole () {
     
 };
 
-function addEmp () {
+async function addEmp () {
     
 };
 
-function updEmpRole () {
+async function updEmpRole () {
     
 };
