@@ -1,170 +1,178 @@
-const inquirer = require('inquirer');
-const { Pool } = require('pg');
+const inquirer = require("inquirer");
+const { Pool } = require("pg");
 
 const pool = new Pool(
     {
-        user:'',
-        password:'',
-        host: 'localhost',
-        database: 'employees_db',
+        user: "postgres",
+        password: "",
+        host: "localhost",
+        database: "employees_db",
     },
-    console.log(`Successfully connected to employees_db!`)    
+    console.log(`Successfully connected to employees_db!`)
 );
 
 pool.connect();
 
 const mainQst = [
     {
-        type: 'list',
-        message: 'What would you like to do?',
-        name: 'main',
+        type: "list",
+        message: "What would you like to do?",
+        name: "main",
         choices: [
-            'View All Employees',
-            'Add Employee',
-            'Update Employee Role',
-            'View All Roles',
-            'Add Role',
-            'View All Departments',
-            'Add Department',
+            "View All Employees",
+            "Add Employee",
+            "Update Employee Role",
+            "View All Roles",
+            "Add Role",
+            "View All Departments",
+            "Add Department",
+            "Quit",
         ],
     },
 ];
 
 const addDptQst = [
     {
-        type: 'input',
-        message: 'What is the name of the department?',
-        name: 'newDptName',
+        type: "input",
+        message: "What is the name of the department?",
+        name: "newDptName",
     },
 ];
 
 const addRoleQst = [
     {
-        type: 'input',
-        message: 'What is the name of the role?',
-        name: 'newRoleName',
+        type: "input",
+        message: "What is the name of the role?",
+        name: "newRoleName",
     },
     {
-        type: 'input',
-        message: 'What is the salary of the role?',
-        name: 'newRoleSalary',
+        type: "input",
+        message: "What is the salary of the role?",
+        name: "newRoleSalary",
     },
     {
-        type: 'list',
-        message: 'Which department does the role belong to?',
-        name: 'newRoleDpt',
+        type: "list",
+        message: "Which department does the role belong to?",
+        name: "newRoleDpt",
         choices: dptChoices,
     },
 ];
 
 const addEmpQst = [
     {
-        type: 'input',
+        type: "input",
         message: `What is the employee's first name?`,
-        name: 'newEmpFstName',
+        name: "newEmpFstName",
     },
     {
-        type: 'input',
+        type: "input",
         message: `What is the employee's last name?`,
-        name: 'newEmpLstName',
+        name: "newEmpLstName",
     },
     {
-        type: 'list',
+        type: "list",
         message: `What is the employee's role?`,
-        name: 'newEmpRole',
+        name: "newEmpRole",
         choices: roleChoices,
     },
     {
-        type: 'list',
+        type: "list",
         message: `Who is the employee's manager?`,
-        name: 'newEmpMngr',
+        name: "newEmpMngr",
         choices: mngrChoices,
     },
 ];
 
 const updEmpRoleQst = [
     {
-        type: 'list',
+        type: "list",
         message: `Which employee's role do you want to update?`,
-        name: 'updEmpRoleName',
+        name: "updEmpRoleName",
         choices: empChoices,
     },
     {
-        type: 'list',
+        type: "list",
         message: `Which role do you want to assign the selected employee?`,
-        name: 'updEmpRoleRole',
+        name: "updEmpRoleRole",
         choices: roleChoices,
     },
 ];
 
-async function getDptChoices () {
-    try {
-        const dptChoices = await pool.query('SELECT name FROM department');
-        return dptChoices.rows.map(row =>  row.name);
-    } catch (err) {
-        console.error('Error querying department:', err);
+function getDptChoices() {
+    return pool.query("SELECT id, name FROM department")
+    .then(res => res.rows.map((row) => ({ name: row.name, value: row.id })))
+    .catch(err => {
+        console.error("Error querying departments:", err);
         return [];
-    }
-};
+    });
+}
 
-async function getRoleChoices () {
-    try {
-        const roleChoices = await pool.query('SELECT id, title FROM role');
-        return roleChoices.rows.map(row =>  ({ name: row.title, value: row.id }));
-    } catch (err) {
-        console.error('Error querying role:', err);
+function getRoleChoices() {
+    return pool.query("SELECT id, title FROM role")
+    .then(res => res.rows.map((row) => ({ name: row.title, value: row.id })))
+    .catch(err => {
+        console.error("Error querying role:", err);
         return [];
-    }
-};
+    });
+}
 
-async function getMngrChoices () {
-    try {
-        const mngrChoices = await pool.query('SELECT id, first_name, last_name FROM employee');
-        return mngrChoices.rows.map(row =>  ({ name: `${row.first_name} ${row.last_name}`, value: row.id }));
-    } catch (err) {
-        console.error('Error querying department:', err);
+function getMngrChoices() {
+    return pool.query("SELECT id, first_name, last_name FROM employee")
+    .then(res => res.rows.map((row) => ({ 
+        name: `${row.first_name} ${row.last_name}`,
+        value: row.id })))
+    .catch(err => {
+        console.error("Error querying managers:", err);
         return [];
-    }
-};
+    });
+}
 
-async function getEmpChoices () {
-    try {
-        const empChoices = await pool.query('SELECT id, first_name, last_name FROM employee');
-        return empChoices.rows.map(row =>  ({ name: `${row.first_name} ${row.last_name}`, value: row.id }));
-    } catch (err) {
-        console.error('Error querying department:', err);
+function getEmpChoices() {
+    return pool.query("SELECT id, first_name, last_name FROM employee")
+    .then(res => res.rows.map((row) => ({ 
+        name: `${row.first_name} ${row.last_name}`,
+        value: row.id })))
+    .catch(err => {
+        console.error("Error querying employees:", err);
         return [];
-    }
-};
+    });
+}
 
-async function empTracker () {
+function empTracker() {
+    inquirer.prompt(mainQst).then((res) => {
+        const choice = res.main;
+        if (choice === "View All Employees") {
+            viewEmps();
+        } else if (choice === "Add Employee") {
+            addEmp();
+        } else if (choice === "Update Employee Role") {
+            updEmpRole();
+        } else if (choice === "View All Roles") {
+            viewRoles();
+        } else if (choice === "Add Role") {
+            addRole();
+        } else if (choice === "View All Departments") {
+            viewDpts();
+        } else if (choice === "Add Department") {
+            addDpt();
+        } else {
+            return;
+        }
+    });
+}
 
-};
+async function viewDpts() { }
 
-async function viewDpt () {
+async function viewRoles() { }
 
-};
+async function viewEmps() { }
 
-async function viewRole () {
+async function addDpt() { }
 
-};
+async function addRole() { }
 
-async function viewEmp () {
+async function addEmp() { }
 
-};
+async function updEmpRole() { }
 
-async function addDpt () {
-
-};
-
-async function addRole () {
-    
-};
-
-async function addEmp () {
-    
-};
-
-async function updEmpRole () {
-    
-};
+empTracker();
